@@ -30,5 +30,5 @@ This is due to we set the apscheduler to run the fetching code every 1 second, b
 After starting the `data-producer.py` program, we could use following command in terminal to read it.
 
 ```
-kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic stock-price --from-beginning --zookeeper localhost:2181
+kafka-console-consumer.sh localhost:9092 --topic stock-price --from-beginning --zookeeper localhost:2181
 ```
