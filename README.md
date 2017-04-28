@@ -25,3 +25,10 @@ WARNING:apscheduler.scheduler:Execution of job "fetch_price (trigger: interval[0
 ```
 
 This is due to we set the apscheduler to run the fetching code every 1 second, but it actually need more than 1 second to run. So it's basically a network issue. 
+
+4. Reading data from terminal
+After starting the `data-producer.py` program, we could use following command in terminal to read it.
+
+```
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic stock-price --from-beginning --zookeeper localhost:2181
+```
