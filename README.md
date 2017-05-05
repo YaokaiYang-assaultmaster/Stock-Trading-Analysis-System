@@ -29,6 +29,13 @@ This is due to we set the apscheduler to run the fetching code every 1 second, b
 4. Reading data from terminal
 After starting the `data-producer.py` program, we could use following command in terminal to read it.
 
+This is the command for older version of Kafka
 ```
 kafka-console-consumer.sh localhost:9092 --topic stock-price --from-beginning --zookeeper localhost:2181
 ```
+
+This is the command for newer version of Kafka
+```
+ 3184  ./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic stock-price --from-beginning
+```
+

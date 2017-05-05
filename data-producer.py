@@ -1,5 +1,4 @@
 """Summary
-
 1. talk to any kafka and topic, configurable
 2. fetch stock price every second
 
@@ -32,7 +31,6 @@ kafka_broker = '127.0.0.1:9092'
 
 def shutdown_hook():
     """Summary
-
     Release resorces at exiting
     Speecifically, releases kafka producer and scheduler
     """
@@ -48,7 +46,6 @@ def shutdown_hook():
 
 def fetch_price(producer, symbol):
     """Summary
-
     Use googlefinance's getQuotes() api to quote a stock's info.
     Store the info into Kafka
 
