@@ -1,4 +1,4 @@
-## Run the `data-producer.py` code
+## Run the `data-producer-zipkin.py` code
 
 1. Set up a zookeeper server in docker container
 
@@ -66,6 +66,19 @@ python data-producer.py AAPL stock-analyzer localhost:9092
 python data-storage.py stock-analyzer localhost:9092 localhost bittiger stock
 ```
 
+## Run the `stream-process.py` code
 
+1. Set up Kafka and Zookeeper as mentioned above.   
 
+2. Start `data-producer.py` to generate data
+
+```
+python data-producer.py GOOGL stock-price localhost:9092
+```   
+
+3. Run the program by submitting it to spark. 
+
+```
+spark-submit --jars spark-streaming-kafka-0-8-assembly_2.11-2.0.0.jar stream-process.py localhost:9092 stock-price average-stock-price
+```
 
