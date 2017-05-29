@@ -18,7 +18,7 @@ Attributes:
 import sys
 import logging
 import json
-import datetime
+import time
 from pyspark import SparkContext
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
@@ -50,63 +50,11 @@ def process(rdd):
     if num_of_record == 0:
         return
 
-    min_price = float(sys.maxint)
-    max_price = float(-sys.maxint)
-    symbol = ''
-    average_time = 0.0
+    rdd_msg = rdd.take(1)
+    symbol = str(json.loads(rdd_msg[0][1].decode('utf-8'))[0].get('StockSymbol'))
 
-    def get_min_price(min_price, record):
-        """
-        Compare two prices and reserves the smaller one. 
-        
-        Args:
-            min_price (float): current minimum price
-            record (record): raw data record in rdd
-
-        """
-        curr_price = float(json.loads(record[1].decode('utf-8'))[0].get('LastTradePrice'))
-        if min_price > curr_price:
-            min_price = curr_price
-
-    def get_max_price(max_price, record):
-        """
-        Compare two prices and reserves the greater one. 
-
-        
-        Args:
-            max_price (float): current maximum price
-            record (record): raw data record in rdd
-        """
-        curr_pricce = float(json.loads(record[1].decode('utf-8'))[0].get('LastTradePrice'))
-        if max_price < curr_pricce:
-            max_price = curr_pricce
-
-    def get_symbol(symbol, record):
-        if symbol == '':
-            symbol = json.loads(record[1].decode('utf-8'))[0].get('StockSymbol')
-        else:
-            return
-
-    def get_average_time(average_time, record):
-        trade_time = json.loads(record[1].decode('utf-8'))[0].get('LastTradeDateTime')
-        trade_time = datetime.datetime.strptime(trade_time, "%Y-%m-%dT%H:%M:%SZ")
-        sec_time = (trade_time - datetime.datetime(1970, 1, 1)).total_seconds()
-        average_time = average_time + sec_time
-
-    # get min_price
-    rdd.foreach(lambda record: get_min_price(min_price, record))
-
-    # get max_price
-    rdd.foreach(lambda record: get_max_price(max_price, record))
-
-    # get stock symbol
-    rdd.foreach(lambda record: get_symbol(symbol, record))
-
-    # get average time
-    rdd.foreach(lambda record: get_average_time(average_time, record))
-
-    average_time = average_time / num_of_record
-    average_time = datetime.datetime.fromtimestamp(average_time).strftime("%Y-%m-%dT%H:%M:%SZ")
+    last_trade_time = json.loads(rdd_msg[0][1].decode('utf-8'))[0].get('LastTradeDateTime')
+    sample_time = time.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     price_sum = rdd.map(lambda record: float(json.loads(record[1].decode('utf-8'))[0].get('LastTradePrice')))
     price_sum = price_sum.reduce(lambda a, b: a + b)
@@ -115,10 +63,10 @@ def process(rdd):
     logger.info('received %d records from kafka, average price is %f' % (num_of_record, average))
 
     data = json.dumps({
-        'snapshot_time': average_time,
-        'average': average,
-        'max_price': max_price,
-        'min_price': min_price
+        'symbol': symbol,
+        'last_trade_time': last_trade_time,
+        'last_sample_time': sample_time,
+        'average': average
         })
 
     try:
